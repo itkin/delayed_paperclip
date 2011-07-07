@@ -11,8 +11,21 @@ class DelayedPaperclipJob < Struct.new(:instance_klass, :instance_id, :attachmen
     end
   end
 
+
   def error(job, exc)
-    instance.send "#{attachment_name}_error", job, exc if instance.respond_to? "#{attachment_name}_error"
+    instance.send "#{attachment_name}_post_process_error", job, exc if instance.respond_to? "#{attachment_name}_post_process_error"
+  end
+
+  def after(job)
+    instance.send "after_#{attachment_name}_post_process", job if instance.respond_to? "after_#{attachment_name}_post_process"
+  end
+
+  def success(job)
+    instance.send "success_#{attachment_name}_post_process", job if instance.respond_to? "success_#{attachment_name}_post_process"
+  end
+
+  def before(job)
+    instance.send "before_#{attachment_name}_post_process", job if instance.respond_to? "before_#{attachment_name}_post_process"
   end
 
   private
