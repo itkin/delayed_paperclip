@@ -1,3 +1,8 @@
+require 'ruby-debug'
+Debugger.start
+Debugger.settings[:autoeval] = true
+
+
 class DelayedPaperclipJob < Struct.new(:instance_klass, :instance_id, :attachment_name)
   def perform
     process_job do
@@ -5,7 +10,11 @@ class DelayedPaperclipJob < Struct.new(:instance_klass, :instance_id, :attachmen
       instance.send("#{attachment_name}_processed!")
     end
   end
-  
+
+  def error(job, exc)
+    instance.send "#{attachment_name}_error", job, exc if instance.respond_to? "#{attachment_name}_error"
+  end
+
   private
   def instance
     @instance ||= instance_klass.constantize.find(instance_id)
